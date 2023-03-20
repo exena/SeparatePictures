@@ -188,23 +188,18 @@ namespace MyFirstCLR {
 	}
 	private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
 
-		struct _wfinddatai64_t c_file;
-		intptr_t hFile;
+		WIN32_FIND_DATA c_file;
+		HANDLE hFile;
 		wchar_t pathfirst[MAX_FILEPATH_LENGTH] = L"";
 		CStringW str2(folderpath);
 		wcscpy(pathfirst, str2);
-
-
-
-
-
-
 		wcscat_s(pathfirst, wcslen(pathfirst) + wcslen(L"\\*.*") + 1, L"\\*.*");
 		wchar_t outpath[MAX_FILEPATH_LENGTH] = L"";
 		CStringW str3(textBox1->Text);
 		wcscpy(outpath, str3);
 
-		if ((hFile = _wfindfirsti64(pathfirst, &c_file)) == -1L) {
+		if ((hFile = FindFirstFile(pathfirst, &c_file)) == FALSE) {
+			
 			switch (errno) {
 			case ENOENT:
 				break;
@@ -224,9 +219,9 @@ namespace MyFirstCLR {
 				wchar_t pathfolder[MAX_FILEPATH_LENGTH] = L"";
 				wcscpy(pathfolder, str2);
 				wcscat_s(pathfolder, wcslen(pathfolder) + wcslen(L"\\") + 1, L"\\");
-				wcscat_s(pathfolder, wcslen(pathfolder) + wcslen(c_file.name) + 1, c_file.name);
+				wcscat_s(pathfolder, wcslen(pathfolder) + wcslen(c_file.cFileName) + 1, c_file.cFileName);
 				wcscat_s(pathfolder, wcslen(pathfolder) + wcslen(L"\0\0") + 1, L"\0\0");
-				if (wcscmp(c_file.name, L".") != 0 && wcscmp(c_file.name, L"..") != 0) {
+				if (wcscmp(c_file.cFileName, L".") != 0 && wcscmp(c_file.cFileName, L"..") != 0) {
 					if (counter == 0) {
 						wcscpy_s(outpathfinal, wcslen(outpath) + 1, outpath);
 						wcscat_s(outpathfinal, wcslen(outpathfinal) + wcslen(L"\\") + 1, L"\\");
@@ -236,7 +231,7 @@ namespace MyFirstCLR {
 						wcscat_s(outpathfinal, wcslen(outpathfinal) + wcslen(L"\0\0") + 1, L"\0\0");
 						CreateDirectoryW(outpathfinal, NULL);
 					}
-					copy(pathfolder, outpathfinal);
+					
 					if (copy(pathfolder, outpathfinal) == 0) {
 						counter++;
 						if (counter == 100) {
@@ -245,8 +240,8 @@ namespace MyFirstCLR {
 						}
 					}
 				}
-			} while (_wfindnexti64(hFile, &c_file) == 0);
-			_findclose(hFile); // return memory used for _findfirsti64(), _findnexti64()
+			} while (FindNextFile(hFile, &c_file)); // load next file
+			FindClose(hFile); // return memory used for _findfirsti64(), _findnexti64()
 		}
 		MessageBox::Show("Transimission is done", "Message");
 		Application::Exit();
