@@ -193,12 +193,6 @@ namespace MyFirstCLR {
 		wchar_t pathfirst[MAX_FILEPATH_LENGTH] = L"";
 		CStringW str2(folderpath);
 		wcscpy(pathfirst, str2);
-
-
-
-
-
-
 		wcscat_s(pathfirst, wcslen(pathfirst) + wcslen(L"\\*.*") + 1, L"\\*.*");
 		wchar_t outpath[MAX_FILEPATH_LENGTH] = L"";
 		CStringW str3(textBox1->Text);
@@ -217,33 +211,29 @@ namespace MyFirstCLR {
 			}
 		}
 		else {
-			int hundredcounter = 0;
-			int counter = 0;
 			wchar_t outpathfinal[MAX_FILEPATH_LENGTH] = L"";
+			wchar_t pathfolder[MAX_FILEPATH_LENGTH] = L"";
+			wchar_t wchart_year_and_month_previous[10] = L"";
+			wchar_t wchart_year_and_month[10] = L"";
 			do {
-				wchar_t pathfolder[MAX_FILEPATH_LENGTH] = L"";
 				wcscpy(pathfolder, str2);
 				wcscat_s(pathfolder, wcslen(pathfolder) + wcslen(L"\\") + 1, L"\\");
 				wcscat_s(pathfolder, wcslen(pathfolder) + wcslen(c_file.name) + 1, c_file.name);
 				wcscat_s(pathfolder, wcslen(pathfolder) + wcslen(L"\0\0") + 1, L"\0\0");
 				if (wcscmp(c_file.name, L".") != 0 && wcscmp(c_file.name, L"..") != 0) {
-					if (counter == 0) {
+					//make new folder if yy/mm is different
+					swprintf_s(wchart_year_and_month, L"%d_%d",
+						localtime(&(c_file.time_create))->tm_year+1900, localtime(&(c_file.time_create))->tm_mon);
+					if (wcscmp(wchart_year_and_month,wchart_year_and_month_previous)!=0) {
 						wcscpy_s(outpathfinal, wcslen(outpath) + 1, outpath);
 						wcscat_s(outpathfinal, wcslen(outpathfinal) + wcslen(L"\\") + 1, L"\\");
-						wchar_t dum[5] = L"";
-						swprintf_s(dum, L"%d", hundredcounter);
-						wcscat_s(outpathfinal, wcslen(outpathfinal) + wcslen(dum) + 1, dum);
+						wcscat_s(outpathfinal, wcslen(outpathfinal) + wcslen(wchart_year_and_month) + 1, wchart_year_and_month);
 						wcscat_s(outpathfinal, wcslen(outpathfinal) + wcslen(L"\0\0") + 1, L"\0\0");
 						CreateDirectoryW(outpathfinal, NULL);
+						//save year and month for the folder name
+						wcscpy_s(wchart_year_and_month_previous, 10, wchart_year_and_month);
 					}
 					copy(pathfolder, outpathfinal);
-					if (copy(pathfolder, outpathfinal) == 0) {
-						counter++;
-						if (counter == 100) {
-							counter = 0;
-							hundredcounter++;
-						}
-					}
 				}
 			} while (_wfindnexti64(hFile, &c_file) == 0);
 			_findclose(hFile); // return memory used for _findfirsti64(), _findnexti64()
